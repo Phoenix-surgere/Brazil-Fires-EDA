@@ -50,19 +50,18 @@ plt.xlabel('Year'); plt.ylabel('Fires per annum'); plt.show()
     
 fires_by_month_and_state = fires.groupby(by=['month', 'state']).mean().unstack()
 
-#Prepare data to plot 12 most inflicted states history of fire - Too messy? Some code and inspiration from kernel found there
+#Prepare data to plot 12 most inflicted states history of fire via SUM (instead of mean)-Some code and inspiration from kernel 
 fires = fires.reset_index(); fires.date = fires.date.dt.year
 fiery = fires_by_state.sort_values(by='number_of_fires', ascending=False)[:12]
 fiery = list(fiery.index.values)
 fires.set_index(keys='state', drop=True, inplace=True)
 fires_most_by_state = fires.loc[fiery]
-fmbsy = fires_most_by_state.groupby(by=['state','date']).mean().reset_index()
+fmbsy = fires_most_by_state.groupby(by=['state','date']).sum().reset_index()
 
-#Cannot seem to get the legend right, need to fix? 
-plt.figure(figsize=(18,7))
-sns.lineplot(x="date", y="number_of_fires", hue="state", data=fmbsy, legend=False)
+#Surprisingly fixed the bug with wrong legend by adding a legend list on the 'hue_order' parameter of line plot!
 legend = list(fmbsy.state.unique())
-plt.legend(labels=legend) 
+plt.figure(figsize=(18,7))  #Need a rather large plot in my PC for clear viewing
+sns.lineplot(x="date", y="number_of_fires", hue="state", data=fmbsy, hue_order=legend)
 plt.xticks(fmbsy["date"])
 plt.title("Top 12 states with forest fires over the years")
 plt.legend(loc="upper left")
